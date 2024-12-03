@@ -1,15 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
+	"github.com/akolybelnikov/advent-of-code-2024/internal/utils"
 	"math"
 	"os"
 	"sort"
-	"strconv"
-	"strings"
-
-	"github.com/akolybelnikov/advent-of-code-2024/internal/utils"
 )
 
 func main() {
@@ -30,38 +26,26 @@ func main() {
 // part one
 func part1(input string) int {
 	var sum int
-	var lines []string
-	scanner := bufio.NewScanner(strings.NewReader(input))
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line != "" {
-			lines = append(lines, line)
-		}
-	}
-	if err := scanner.Err(); err != nil {
+	lines, err := utils.ParseLines(input)
+	if err != nil {
 		fmt.Println("Error reading input file: ", err)
 		os.Exit(1)
 	}
+
 	arr1 := make([]int, len(lines))
 	arr2 := make([]int, len(lines))
-	for i, line := range lines {
-		if line == "" {
-			continue
-		}
-		nums := strings.Fields(line)
-		num1, err := strconv.Atoi(nums[0])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(0)
-		}
-		arr1[i] = num1
-		num2, err := strconv.Atoi(nums[1])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(0)
-		}
-		arr2[i] = num2
+
+	intSlices, err := utils.ConvertLinesToIntSlices(lines)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
+
+	for i, slice := range intSlices {
+		arr1[i] = slice[0]
+		arr2[i] = slice[1]
+	}
+
 	sort.Ints(arr1)
 	sort.Ints(arr2)
 
@@ -75,38 +59,24 @@ func part1(input string) int {
 // part two
 func part2(input string) int {
 	var sum int
-	var lines []string
-	scanner := bufio.NewScanner(strings.NewReader(input))
-	for scanner.Scan() {
-		line := scanner.Text()
-		if line != "" {
-			lines = append(lines, line)
-		}
-	}
-	if err := scanner.Err(); err != nil {
+	lines, err := utils.ParseLines(input)
+	if err != nil {
 		fmt.Println("Error reading input file: ", err)
 		os.Exit(1)
 	}
+
 	arr1 := make([]int, len(lines))
 	map2 := make(map[int]int)
 
-	for i, line := range lines {
-		if line == "" {
-			continue
-		}
-		nums := strings.Fields(line)
-		num1, err := strconv.Atoi(nums[0])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(0)
-		}
-		arr1[i] = num1
-		num2, err := strconv.Atoi(nums[1])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(0)
-		}
-		map2[num2]++
+	intSlices, err := utils.ConvertLinesToIntSlices(lines)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	for i, slice := range intSlices {
+		arr1[i] = slice[0]
+		map2[slice[1]]++
 	}
 
 	for _, i2 := range arr1 {
