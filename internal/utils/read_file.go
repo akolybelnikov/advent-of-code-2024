@@ -47,3 +47,12 @@ func ConvertLinesToIntSlices(data []string) ([][]int, error) {
 
 	return intSlices, nil
 }
+
+func ConvertLinesToRuneSlices(data []string) [][]rune {
+	runeSlices := make([][]rune, len(data))
+	for i, line := range data {
+		runs := []rune(line)
+		runeSlices[i] = runs
+	}
+	return runeSlices
+}
