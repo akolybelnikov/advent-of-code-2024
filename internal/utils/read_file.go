@@ -26,10 +26,37 @@ func ParseLines(data string) ([]string, error) {
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return lines, err
+		return nil, err
 	}
 
 	return lines, nil
+}
+
+func ParseBlocksOfLines(data string) ([][]string, error) {
+	var blocks = make([][]string, 0)
+	var curBlock []string
+	scanner := bufio.NewScanner(strings.NewReader(data))
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line != "" {
+			curBlock = append(curBlock, line)
+		} else {
+			if len(curBlock) > 0 {
+				blocks = append(blocks, curBlock)
+				curBlock = make([]string, 0)
+			}
+		}
+	}
+
+	if len(curBlock) > 0 {
+		blocks = append(blocks, curBlock)
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return blocks, nil
 }
 
 func ConvertLinesToIntSlices(data []string) ([][]int, error) {
