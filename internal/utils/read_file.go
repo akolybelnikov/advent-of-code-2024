@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -82,4 +83,28 @@ func ConvertLinesToRuneSlices(data []string) [][]rune {
 		runeSlices[i] = runs
 	}
 	return runeSlices
+}
+
+func ParseRuneLines(input string) ([][]rune, error) {
+	var result [][]rune
+	scanner := bufio.NewScanner(strings.NewReader(input))
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line != "" {
+			runes := []rune(line)
+			result = append(result, runes)
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func HandleErr(err error) {
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(0)
+	}
 }
