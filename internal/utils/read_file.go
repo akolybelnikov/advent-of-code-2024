@@ -102,6 +102,28 @@ func ParseRuneLines(input string) ([][]rune, error) {
 	return result, nil
 }
 
+func ParseIntLines(input string) ([][]int, error) {
+	var result [][]int
+	scanner := bufio.NewScanner(strings.NewReader(input))
+	for scanner.Scan() {
+		line := scanner.Text()
+		nums := make([]int, len(line))
+		if line != "" {
+			for i, s := range line {
+				num := s - '0'
+				nums[i] = int(num)
+			}
+			result = append(result, nums)
+		}
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
 func HandleErr(err error) {
 	if err != nil {
 		fmt.Println(err)
