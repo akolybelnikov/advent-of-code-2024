@@ -69,7 +69,9 @@ func calc(a, b, c image.Point) int {
 	if diffB != 0 {
 		bp = (a.Y*c.X - a.X*c.Y) / diffB
 	}
-	if a.Mul(ap).Add(b.Mul(bp)) == c {
+
+	check := a.Mul(ap).Add(b.Mul(bp))
+	if check == c {
 		return ap*3 + bp
 	}
 	return 0
