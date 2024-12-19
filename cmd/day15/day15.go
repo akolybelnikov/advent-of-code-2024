@@ -39,42 +39,20 @@ func part1(input string) int {
 		'v': {0, 1},
 	}
 
-	visualize(&grid)
-
 	for _, dir := range instructions {
 		move(&grid, &robot, directions[dir])
 	}
-
-	visualize(&grid)
 
 	return sumOfBoxesGPS(&grid)
 }
 
 // part two
 func part2(input string) int {
-	blocks, err := utils.ParseBlocksOfLines(input)
-	utils.HandleErr(err)
+	blocks := strings.Split(strings.TrimSpace(input), "\n\r")
 
-	instructions := sanitize(blocks[1])
-	expanded := expandInput(blocks[0])
-	grid, robot := createGrid(expanded)
+	r := strings.NewReplacer("#", "##", "O", "[]", ".", "..", "@", "@.")
 
-	directions := map[rune]image.Point{
-		'<': {-1, 0},
-		'>': {1, 0},
-		'^': {0, -1},
-		'v': {0, 1},
-	}
-
-	visualize(&grid)
-
-	for _, dir := range instructions {
-		move(&grid, &robot, directions[dir])
-	}
-
-	visualize(&grid)
-
-	return 0
+	return run(r.Replace(blocks[0]), blocks[1])
 }
 
 // sanitize is used to trim and join the instructions
@@ -164,43 +142,11 @@ func lookup(grid *map[image.Point]rune, box image.Point, dir image.Point) int {
 		if (*grid)[next] == '#' {
 			return 0
 		}
-	case '[', ']':
-		num += 2
-		for (*grid)[next] != '.' && (*grid)[next] != '#' {
-			num += 2
-			next = next.Add(dir.Mul(2))
-		}
-		if (*grid)[next] == '#' {
-			return 0
-		}
 	default:
 		return 0
 	}
 
 	return num
-}
-
-func verticalLookup(grid *map[image.Point]rune, side image.Point, dir image.Point) *[]image.Point {
-	boxes := completeBox((*grid)[side], side)
-	nextLeft, nextRight := boxes[0].Add(dir), boxes[1].Add(dir)
-	switch {
-	case (*grid)[nextLeft] == '.' && (*grid)[nextRight] == '.':
-		return &boxes
-	case (*grid)[nextLeft] == '#' || (*grid)[nextRight] == '#':
-		return nil
-	case (*grid)[nextLeft] == '[', (*grid)[nextLeft] == ']':
-
-	}
-
-	return &boxes
-}
-
-func completeBox(side rune, point image.Point) []image.Point {
-	if side == '[' {
-		return []image.Point{point, point.Add(image.Point{X: 1, Y: 0})}
-	} else {
-		return []image.Point{point.Add(image.Point{X: -1, Y: 0}), point}
-	}
 }
 
 // sumOfBoxesGPS calculates the sum according to the puzzle rules
@@ -214,30 +160,6 @@ func sumOfBoxesGPS(grid *map[image.Point]rune) int {
 	}
 
 	return sum
-}
-
-// expandInput doubles the width of the original grid according to the puzzle rules for part 2
-func expandInput(input []string) []string {
-	builder := strings.Builder{}
-	res := make([]string, len(input))
-	for i, s := range input {
-		for _, r := range s {
-			switch r {
-			case '#':
-				builder.WriteString("##")
-			case 'O':
-				builder.WriteString("[]")
-			case '@':
-				builder.WriteString("@.")
-			default:
-				builder.WriteString("..")
-			}
-		}
-		res[i] = builder.String()
-		builder.Reset()
-	}
-
-	return res
 }
 
 // visualize converts the map of image.Points into their string representations to print it out
@@ -271,4 +193,62 @@ func visualize(grid *map[image.Point]rune) {
 		}
 		fmt.Println()
 	}
+}
+
+func run(input, moves string) int {
+	grid, robot := map[image.Point]rune{}, image.Point{}
+	for y, s := range strings.Fields(input) {
+		for x, r := range s {
+			if r == '@' {
+				robot = image.Point{X: x, Y: y}
+				r = '.'
+			}
+			grid[image.Point{X: x, Y: y}] = r
+		}
+	}
+
+	delta := map[rune]image.Point{
+		'^': {0, -1}, '>': {1, 0}, 'v': {0, 1}, '<': {-1, 0},
+		'[': {1, 0}, ']': {-1, 0},
+	}
+
+loop:
+	for _, r := range strings.ReplaceAll(moves, "\n", "") {
+		queue, boxes := []image.Point{robot}, map[image.Point]rune{}
+		for len(queue) > 0 {
+			p := queue[0]
+			queue = queue[1:]
+
+			if _, ok := boxes[p]; ok {
+				continue
+			}
+			boxes[p] = grid[p]
+
+			switch n := p.Add(delta[r]); grid[n] {
+			case '#':
+				continue loop
+			case '[', ']':
+				queue = append(queue, n.Add(delta[grid[n]]))
+				fallthrough
+			case 'O':
+				queue = append(queue, n)
+			}
+		}
+
+		for b := range boxes {
+			grid[b] = '.'
+		}
+		for b := range boxes {
+			grid[b.Add(delta[r])] = boxes[b]
+		}
+		robot = robot.Add(delta[r])
+	}
+
+	gps := 0
+	for p, r := range grid {
+		if r == 'O' || r == '[' {
+			gps += 100*p.Y + p.X
+		}
+	}
+	return gps
 }

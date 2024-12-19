@@ -6,32 +6,30 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestDay17(t *testing.T) {
+func TestDay19(t *testing.T) {
 	assertions := assert.New(t)
 	input := `
-Register A: 729
-Register B: 0
-Register C: 0
+r, wr, b, g, bwu, rb, gb, br
 
-Program: 0,1,5,4,3,0`
+brwrr
+bggr
+gbbr
+rrbgbr
+ubwu
+bwurrg
+brgr
+bbrgwb`
 
 	t.Run("part 1", func(t *testing.T) {
-		expected := "4,6,3,5,6,3,5,2,1,0"
+		expected := 6
 		actual := part1(input)
 
 		assertions.Equal(expected, actual)
 	})
 
-	input2 := `
-Register A: 2024
-Register B: 0
-Register C: 0
-
-Program: 0,3,5,4,3,0`
-
 	t.Run("part 2", func(t *testing.T) {
-		expected := 117440
-		actual := part2(input2)
+		expected := 16
+		actual := part2(input)
 
 		assertions.Equal(expected, actual)
 	})

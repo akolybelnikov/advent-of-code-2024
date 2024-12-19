@@ -43,22 +43,22 @@ vvv<<^>^v^^><<>>><>^<<><^vv^^<>vvv<>><^^v>^>vv<>v<<<<v<^v>^<^^>>>^<v<v
 ^^>vv<^v^v<vv>^<><v<^v>^^^>>>^^vvv^>vvv<>>>^<^>>>>>^<<^v>^vvv<>^<><<v>
 v^^>>><<^^<>>^v^<v^vv<>v^<<>^<^v^v><^<<<><<^<v><v<>vv>>v><v^<vv<>v^<<^`
 
-	//t.Run("part 1 small input", func(t *testing.T) {
-	//	expected := 2028
-	//	actual := part1(input)
-	//
-	//	assertions.Equal(expected, actual)
-	//})
-	//
-	//t.Run("part 1 large input", func(t *testing.T) {
-	//	expected := 10092
-	//	actual := part1(input2)
-	//
-	//	assertions.Equal(expected, actual)
-	//})
+	t.Run("part 1 small input", func(t *testing.T) {
+		expected := 2028
+		actual := part1(input)
+
+		assertions.Equal(expected, actual)
+	})
+
+	t.Run("part 1 large input", func(t *testing.T) {
+		expected := 10092
+		actual := part1(input2)
+
+		assertions.Equal(expected, actual)
+	})
 
 	t.Run("part 2 small input", func(t *testing.T) {
-		expected := 0
+		expected := 1751
 		actual := part2(input)
 
 		assertions.Equal(expected, actual)
