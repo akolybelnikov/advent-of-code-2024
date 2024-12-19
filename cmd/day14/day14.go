@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	"image/gif"
 	"image/png"
 	"os"
 	"strings"
 
 	"github.com/akolybelnikov/advent-of-code-2024/internal/utils"
 )
+
+type Robot struct {
+	P, V image.Point
+}
 
 func main() {
 	// read form file
@@ -24,13 +27,6 @@ func main() {
 	fmt.Println("Result:", part1(input, 101, 103))
 	fmt.Println("--- Part Two ---")
 	fmt.Println("Result:", part2(input))
-
-	frames := make([]string, 101*103)
-	for i := 0; i < 101*103; i++ {
-		img := fmt.Sprintf("images/grid_%d.png", i)
-		frames[i] = img
-	}
-	generateGIF(frames)
 
 	os.Exit(0)
 }
@@ -55,37 +51,36 @@ func part1(input string, w, h int) int {
 	return ans
 }
 
-// part two
+// part2 calculates the number of steps required for all robots to occupy unique positions in a bounded grid area.
 func part2(input string) int {
-	ans := 1
-	w, h := 101, 103
-	lines, err := utils.ParseLines(input)
-	utils.HandleErr(err)
-	points := make(map[image.Point]image.Point)
-	frames := make([]string, 0)
-	for _, line := range lines {
-		line = strings.Trim(line, " ")
-		var p, v image.Point
-		_, _ = fmt.Sscanf(line, "p=%d,%d v=%d,%d", &p.X, &p.Y, &v.X, &v.Y)
-		points[v] = p
-		imageName := generateImage(&points, 0)
-		frames = append(frames, imageName)
-	}
+	area := image.Rectangle{Min: image.Point{}, Max: image.Point{X: 101, Y: 103}}
 
-	for i := 1; i < (101 * 103); i++ {
-		newPoints := make(map[image.Point]image.Point)
-		for point, vector := range points {
-			np := calc(w, h, point.X, point.Y, vector.X, vector.Y)
-			newPoints[image.Point{X: np[0], Y: np[1]}] = vector
+	var robots []Robot
+	quads := map[image.Point]int{}
+	for _, s := range strings.Split(strings.TrimSpace(input), "\n") {
+		var r Robot
+		_, err := fmt.Sscanf(s, "p=%d,%d v=%d,%d", &r.P.X, &r.P.Y, &r.V.X, &r.V.Y)
+		if err != nil {
+			utils.HandleErr(err)
 		}
-		imageName := generateImage(&newPoints, i)
-		frames = append(frames, imageName)
-		points = newPoints
+		robots = append(robots, r)
+		r.P = r.P.Add(r.V.Mul(100)).Mod(area)
+		quads[image.Point{X: sgn(r.P.X - area.Dx()/2), Y: sgn(r.P.Y - area.Dy()/2)}]++
 	}
+	fmt.Println(quads[image.Point{X: -1, Y: -1}] * quads[image.Point{X: 1, Y: -1}] *
+		quads[image.Point{X: 1, Y: 1}] * quads[image.Point{X: -1, Y: 1}])
 
-	generateGIF(frames)
-
-	return ans
+	// calculates the smallest time `t` at which all robots occupy distinct positions in a 2D wrapping grid
+	for t := 1; ; t++ {
+		seen := map[image.Point]struct{}{}
+		for i := range robots {
+			robots[i].P = robots[i].P.Add(robots[i].V).Mod(area)
+			seen[robots[i].P] = struct{}{}
+		}
+		if len(seen) == len(robots) {
+			return t
+		}
+	}
 }
 
 // calc returns the new position of a point
@@ -160,68 +155,11 @@ func drawPoint(img *image.RGBA, pt image.Point, size int, col color.Color) {
 	}
 }
 
-func generateGIF(frames []string) {
-	// Output GIF
-	outputFile, err := os.Create("output.gif")
-	if err != nil {
-		panic(err)
+func sgn(i int) int {
+	if i < 0 {
+		return -1
+	} else if i > 0 {
+		return 1
 	}
-	defer func(outputFile *os.File) {
-		err := outputFile.Close()
-		utils.HandleErr(err)
-	}(outputFile)
-
-	// Create the GIF structure
-	var g gif.GIF
-
-	// Set desired delay per frame
-	frameDelay := 50 // Delay in hundredths of a second (e.g., 5 = 50ms per frame)
-
-	// Define the transparent color for the background
-	transparentColor := color.Transparent
-	// Create a custom palette with green as the main color (adjust as necessary)
-	greenColor := color.RGBA{G: 255, A: 255} // Pure green
-	// Create a palette containing green and transparent colors
-	palette := []color.Color{
-		greenColor,
-		transparentColor,
-	}
-
-	// Loop through each PNG file
-	for _, file := range frames {
-		// Open the PNG file
-		f, err := os.Open(file)
-		utils.HandleErr(err)
-
-		// Decode the PNG image
-		img, err := png.Decode(f)
-		utils.HandleErr(err)
-
-		// Create a paletted image with a transparent background
-		palettedImage := image.NewPaletted(img.Bounds(), palette)
-
-		// Manually draw the image pixels into the palettedImage, preserving transparency
-		for y := 0; y < img.Bounds().Dy(); y++ {
-			for x := 0; x < img.Bounds().Dx(); x++ {
-				// Get the color of the pixel at (x, y)
-				at := img.At(x, y)
-				// If the pixel is transparent, we leave it as transparent (no change)
-				if at == greenColor {
-					palettedImage.Set(x, y, at)
-				} else {
-					palettedImage.Set(x, y, transparentColor)
-				}
-			}
-		}
-
-		// Append the frame to the GIF structure
-		g.Image = append(g.Image, palettedImage)
-		g.Delay = append(g.Delay, frameDelay) // Set delay for this frame
-
-		_ = f.Close()
-	}
-
-	// Encode and save the GIF to the output file
-	err = gif.EncodeAll(outputFile, &g)
-	utils.HandleErr(err)
+	return 0
 }
