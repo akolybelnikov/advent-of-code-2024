@@ -162,39 +162,6 @@ func sumOfBoxesGPS(grid *map[image.Point]rune) int {
 	return sum
 }
 
-// visualize converts the map of image.Points into their string representations to print it out
-func visualize(grid *map[image.Point]rune) {
-	// Determine the grid bounds
-	minX, minY := 0, 0
-	maxX, maxY := 0, 0
-	for p := range *grid {
-		if p.X < minX {
-			minX = p.X
-		}
-		if p.Y < minY {
-			minY = p.Y
-		}
-		if p.X > maxX {
-			maxX = p.X
-		}
-		if p.Y > maxY {
-			maxY = p.Y
-		}
-	}
-
-	// Build the grid as a string
-	for y := minY; y <= maxY; y++ {
-		for x := minX; x <= maxX; x++ {
-			if r, ok := (*grid)[image.Point{X: x, Y: y}]; ok {
-				fmt.Print(string(r))
-			} else {
-				fmt.Print(".") // Default empty space
-			}
-		}
-		fmt.Println()
-	}
-}
-
 func run(input, moves string) int {
 	grid, robot := map[image.Point]rune{}, image.Point{}
 	for y, s := range strings.Fields(input) {
