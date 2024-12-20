@@ -33,8 +33,8 @@ func TestDay20(t *testing.T) {
 	})
 
 	t.Run("part 2", func(t *testing.T) {
-		expected := 0
-		actual := part2(input)
+		expected := 285
+		actual := part2(input, 50)
 
 		assertions.Equal(expected, actual)
 	})

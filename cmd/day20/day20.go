@@ -2,10 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/akolybelnikov/advent-of-code-2024/internal/utils"
 	"image"
 	"os"
-
-	"github.com/akolybelnikov/advent-of-code-2024/internal/utils"
 )
 
 const (
@@ -123,7 +122,7 @@ func main() {
 	fmt.Println("--- Part One ---")
 	fmt.Println("Result:", part1(input, 100))
 	fmt.Println("--- Part Two ---")
-	fmt.Println("Result:", part2(input))
+	fmt.Println("Result:", part2(input, 100))
 
 	os.Exit(0)
 }
@@ -142,7 +141,8 @@ func part1(input string, min int) int {
 }
 
 // part two
-func part2(input string) int {
+func part2(input string, min int) int {
+	res := 0
 	lines, err := utils.ParseLines(input)
 	utils.HandleErr(err)
 
@@ -151,7 +151,16 @@ func part2(input string) int {
 
 	g.traverse()
 
-	return 0
+	for p := range g.path {
+		for q := range g.path {
+			diff := abs(q.X-p.X) + abs(q.Y-p.Y)
+			if diff <= 20 && g.path[q].ps-g.path[p].ps-diff >= min {
+				res++
+			}
+		}
+	}
+
+	return res
 }
 
 func newGrid(lines []string) (grid, error) {
@@ -177,4 +186,11 @@ func newGrid(lines []string) (grid, error) {
 	}
 
 	return g, nil
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
