@@ -23,7 +23,7 @@ func ParseLines(data string) ([]string, error) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line != "" {
-			line = strings.Trim(line, " \n\r\t")
+			line = strings.Trim(line, " \n\r\t ")
 			lines = append(lines, line)
 		}
 	}
